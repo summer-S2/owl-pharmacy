@@ -1,0 +1,19 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+
+# 주소를 새로고침하거나 바로 열어도 앱이 뜨도록 (Vue Router)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# 로컬 개발(netlify dev): Vite를 5180 포트로 띄운다 (5173은 따로 npm run dev를 켜 둘 수 있게 비워 둠)
+[dev]
+  framework = "vite"
+  command = "npx vite --port 5180 --strictPort"
+  targetPort = 5180
+  port = 8888
