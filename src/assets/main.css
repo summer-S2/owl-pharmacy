@@ -1,0 +1,98 @@
+/* 부엉이약국 전체 스타일
+   색은 테마(src/themes.ts)가 아래 변수를 덮어써서 바꾼다. 여기 값은 기본 테마(다크)와 같은 값 */
+:root {
+  --bg-top: #1a2132;
+  --bg-bottom: #212a3e;
+  --card: #2a3550;
+  --card-2: #394867;
+  --line: #465679;
+  --text: #f1f6f9;
+  --muted: #9ba4b5;
+  --accent: #f1f6f9; /* 포인트: 선택된 탭, 영업 중, 주요 버튼 */
+  --on-accent: #212a3e; /* 포인트 색 위 글자 */
+  --danger: #ffb4c0;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  color: var(--text);
+  background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 100%) fixed;
+  background-color: var(--bg-top);
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+/* 공통 버튼 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--card-2);
+  color: var(--text);
+  text-decoration: none;
+  font-size: 15px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* 입력칸 (16px 미만이면 아이폰에서 입력할 때 화면이 확대됨) */
+input[type="search"],
+input[type="text"],
+select {
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--card);
+  font-size: 16px;
+  outline: none;
+}
+input:focus,
+select:focus {
+  border-color: var(--accent);
+}
+
+/* 버튼 안 아이콘과 글자 간격 */
+.btn {
+  gap: 6px;
+}
+/* 불러오는 중 아이콘 회전 */
+.spin {
+  vertical-align: -3px;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
