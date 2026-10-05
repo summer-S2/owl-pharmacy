@@ -3,7 +3,8 @@
 import { reactive } from "vue";
 import { searchPharmacies, type SearchResult } from "./api";
 
-export type Mode = "near" | "region" | "name";
+// near: 내 위치 / region: 지역 / name: 이름 / area: 지도에서 고른 곳 ("이 지역에서 찾기")
+export type Mode = "near" | "region" | "name" | "area";
 
 export const search = reactive({
   mode: "near" as Mode,
@@ -16,6 +17,8 @@ export const search = reactive({
   sigungu: "",
   // 이름 검색
   q: "",
+  // 지도에서 고른 곳 (지도 가운데)
+  areaCenter: null as { lat: number; lon: number } | null,
   // 필터
   onlyOpen: true,
   onlyHoliday: false,
@@ -33,6 +36,7 @@ export const search = reactive({
 export function canSearch() {
   if (search.mode === "near") return !!search.coords;
   if (search.mode === "region") return !!search.sido;
+  if (search.mode === "area") return !!search.areaCenter;
   return search.q.trim().length > 0;
 }
 
@@ -48,8 +52,10 @@ export async function runSearch(limit = search.baseLimit) {
   search.limit = limit;
   try {
     const result = await searchPharmacies({
-      // 위치가 있으면 어떤 모드든 가까운 순으로 정렬하고 거리를 보여준다
+      // 위치가 있으면 어떤 모드든 거리를 보여주고 가까운 순으로 정렬한다
       ...(search.coords ?? {}),
+      // 지도에서 고른 곳이면 그 지점에서 가까운 순 (거리는 계속 내 위치 기준)
+      center: search.mode === "area" ? (search.areaCenter ?? undefined) : undefined,
       sido: search.mode === "region" ? search.sido : undefined,
       sigungu: search.mode === "region" ? search.sigungu : undefined,
       q: search.mode === "name" ? search.q.trim() : undefined,

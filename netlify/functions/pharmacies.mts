@@ -3,6 +3,7 @@ import { dayIndex, isOpenNow, kstNow, loadDataset, regionOf, type Pharmacy } fro
 // 약국 검색
 // GET /api/pharmacies
 //   lat, lon        내 위치 (있으면 가까운 순, 거리 표시)
+//   clat, clon      정렬 기준 지점 (지도의 "이 지역에서 찾기": 지도 가운데에서 가까운 순. 거리는 계속 내 위치 기준)
 //   sido, sigungu   지역
 //   q               약국 이름 검색
 //   open=1          지금 영업 중만
@@ -32,6 +33,9 @@ export default async (req: Request) => {
   const lat = Number(params.get("lat"));
   const lon = Number(params.get("lon"));
   const hasLocation = params.has("lat") && params.has("lon") && Number.isFinite(lat) && Number.isFinite(lon);
+  const clat = Number(params.get("clat"));
+  const clon = Number(params.get("clon"));
+  const hasCenter = params.has("clat") && params.has("clon") && Number.isFinite(clat) && Number.isFinite(clon);
   const sido = params.get("sido") ?? "";
   const sigungu = params.get("sigungu") ?? "";
   const q = (params.get("q") ?? "").trim().replace(/\s+/g, "");
@@ -51,7 +55,7 @@ export default async (req: Request) => {
   const holidayName = data.holidays[now.date] ?? null;
   const todayIdx = dayIndex(now.weekday, holidayName !== null);
 
-  let list: { p: Pharmacy; dist: number | null }[] = [];
+  let list: { p: Pharmacy; dist: number | null; sortKey: number }[] = [];
   for (const p of data.pharmacies) {
     if (sido || sigungu) {
       const r = regionOf(p.addr);
@@ -61,11 +65,13 @@ export default async (req: Request) => {
     if (q && !p.name.replace(/\s+/g, "").includes(q)) continue;
     if (onlyHoliday && !p.hours[7]) continue;
     if (onlyOpen && !isOpenNow(p, data.holidays, now)) continue;
-    list.push({ p, dist: hasLocation ? distance(lat, lon, p.lat, p.lon) : null });
+    const dist = hasLocation ? distance(lat, lon, p.lat, p.lon) : null;
+    const sortKey = hasCenter ? distance(clat, clon, p.lat, p.lon) : (dist ?? 0);
+    list.push({ p, dist, sortKey });
   }
 
   const total = list.length;
-  list.sort((a, b) => (hasLocation ? a.dist! - b.dist! : a.p.name.localeCompare(b.p.name, "ko")));
+  list.sort((a, b) => (hasCenter || hasLocation ? a.sortKey - b.sortKey : a.p.name.localeCompare(b.p.name, "ko")));
   list = list.slice(0, limit);
 
   return json({

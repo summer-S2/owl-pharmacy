@@ -27,6 +27,7 @@ export type Region = { sido: string; sigungu: string[] };
 export type SearchParams = {
   lat?: number;
   lon?: number;
+  center?: { lat: number; lon: number }; // 정렬 기준 지점 (지도 가운데)
   sido?: string;
   sigungu?: string;
   q?: string;
@@ -57,6 +58,10 @@ export function searchPharmacies(p: SearchParams) {
   if (p.lat !== undefined && p.lon !== undefined) {
     qs.set("lat", String(p.lat));
     qs.set("lon", String(p.lon));
+  }
+  if (p.center) {
+    qs.set("clat", String(p.center.lat));
+    qs.set("clon", String(p.center.lon));
   }
   if (p.sido) qs.set("sido", p.sido);
   if (p.sigungu) qs.set("sigungu", p.sigungu);

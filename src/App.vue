@@ -41,7 +41,8 @@ const syncedAt = computed(() =>
 
     <SearchPanel v-if="!isSettings" />
 
-    <nav v-if="!isSettings" class="tabs">
+    <nav v-if="!isSettings" class="tabs" :style="{ '--i': route.name === 'map' ? 1 : 0 }">
+      <span class="tab-line" aria-hidden="true" />
       <!-- RouterLink: 페이지를 새로 불러오지 않고 주소만 바꾸는 링크 -->
       <RouterLink to="/" class="tab">목록</RouterLink>
       <RouterLink to="/map" class="tab">지도</RouterLink>
@@ -130,23 +131,37 @@ const syncedAt = computed(() =>
   color: var(--accent);
 }
 .tabs {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   border-bottom: 1px solid var(--line);
 }
 .tab {
   text-align: center;
-  padding: 10px;
+  padding: 12px 10px;
   color: var(--muted);
   text-decoration: none;
-  border-bottom: 3px solid transparent;
-  margin-bottom: -1px;
+  transition: color 0.25s;
+}
+.tab:hover {
+  color: var(--text);
 }
 /* 현재 주소와 같은 링크에 Vue Router가 붙여 주는 클래스 */
 .tab.router-link-exact-active {
   color: var(--accent);
-  border-bottom-color: var(--accent);
   font-weight: 700;
+}
+/* 고른 탭 아래로 미끄러지는 밑줄 */
+.tab-line {
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 50%;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--accent);
+  transform: translateX(calc(var(--i) * 100%));
+  transition: transform 0.35s cubic-bezier(0.3, 1.3, 0.5, 1);
 }
 .foot {
   margin-top: 12px;

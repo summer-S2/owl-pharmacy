@@ -1,7 +1,7 @@
 <!-- 약국 카드: 목록 탭과 지도 탭(핀을 눌렀을 때)에서 함께 쓴다 -->
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import { ChevronDown, ChevronUp, Map, Navigation, Phone } from "lucide-vue-next";
+import { ChevronDown, MapPin, Phone } from "lucide-vue-next";
 import { DAY_LABELS, formatDistance, formatHours, type PharmacyItem } from "../api";
 
 // props: 부모가 넘겨주는 값 (React의 props와 같음)
@@ -9,8 +9,9 @@ const props = defineProps<{ p: PharmacyItem; holidayName: string | null }>();
 
 const showWeek = ref(false); // 요일별 운영 시간 펼치기
 
+// 지도 앱에서 약국 위치 보기 (카카오: 좌표에 핀, 네이버: 약국 이름 + 동네로 검색)
 const kakaoUrl = computed(
-  () => `https://map.kakao.com/link/to/${encodeURIComponent(props.p.name)},${props.p.lat},${props.p.lon}`
+  () => `https://map.kakao.com/link/map/${encodeURIComponent(props.p.name)},${props.p.lat},${props.p.lon}`
 );
 const naverUrl = computed(
   () => `https://map.naver.com/p/search/${encodeURIComponent(`${props.p.name} ${props.p.addr.split(" ").slice(0, 3).join(" ")}`)}`
@@ -21,7 +22,9 @@ const naverUrl = computed(
   <article class="card" :class="{ closed: !p.openNow }">
     <header class="head">
       <h3 class="name">{{ p.name }}</h3>
-      <span class="badge" :class="p.openNow ? 'open' : 'off'">{{ p.openNow ? "영업 중" : "영업 종료" }}</span>
+      <span class="badge" :class="p.openNow ? 'open' : 'off'">
+        <i v-if="p.openNow" class="live" aria-hidden="true" />{{ p.openNow ? "영업 중" : "영업 종료" }}
+      </span>
     </header>
 
     <p class="addr">
@@ -40,25 +43,29 @@ const naverUrl = computed(
       </div>
     </dl>
 
-    <button class="more" @click="showWeek = !showWeek">
+    <button class="more" :class="{ open: showWeek }" :aria-expanded="showWeek" @click="showWeek = !showWeek">
       {{ showWeek ? "요일별 시간 접기" : "요일별 시간 보기" }}
-      <ChevronUp v-if="showWeek" :size="16" />
-      <ChevronDown v-else :size="16" />
+      <ChevronDown :size="16" class="chev" />
     </button>
-    <!-- v-if: 조건이 참일 때만 그린다 / v-for: 목록을 반복해서 그린다 -->
-    <table v-if="showWeek" class="week">
-      <tbody>
-        <tr v-for="(h, i) in p.hours" :key="i">
-          <th>{{ DAY_LABELS[i] }}</th>
-          <td :class="{ muted: !h }">{{ formatHours(h) }}</td>
-        </tr>
-      </tbody>
-    </table>
+    <!-- 요일별 시간: 높이가 0 ↔ 원래 높이로 부드럽게 펼쳐진다 -->
+    <div class="week-wrap" :class="{ open: showWeek }">
+      <div class="week-inner">
+        <table class="week">
+          <tbody>
+            <!-- v-for: 목록을 반복해서 그린다 -->
+            <tr v-for="(h, i) in p.hours" :key="i">
+              <th>{{ DAY_LABELS[i] }}</th>
+              <td :class="{ muted: !h }">{{ formatHours(h) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
     <div class="actions">
       <a v-if="p.tel" class="btn primary" :href="`tel:${p.tel}`"><Phone :size="17" />전화</a>
-      <a class="btn" :href="kakaoUrl" target="_blank" rel="noopener"><Navigation :size="17" />카카오맵 길찾기</a>
-      <a class="btn" :href="naverUrl" target="_blank" rel="noopener"><Map :size="17" />네이버지도</a>
+      <a class="btn" :href="kakaoUrl" target="_blank" rel="noopener"><MapPin :size="17" />카카오맵에서 보기</a>
+      <a class="btn" :href="naverUrl" target="_blank" rel="noopener"><MapPin :size="17" />네이버지도에서 보기</a>
     </div>
   </article>
 </template>
@@ -72,8 +79,58 @@ const naverUrl = computed(
   display: grid;
   gap: 10px;
 }
+.card {
+  transition:
+    transform 0.2s cubic-bezier(0.3, 1.4, 0.5, 1),
+    box-shadow 0.2s,
+    border-color 0.2s;
+}
+@media (hover: hover) {
+  .card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  }
+}
 .card.closed {
   opacity: 0.75;
+}
+/* 영업 중 배지 앞의 두근거리는 점 */
+.live {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 6px;
+  vertical-align: 1px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: live 1.6s ease-out infinite;
+}
+@keyframes live {
+  0% {
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+.chev {
+  transition: transform 0.25s;
+}
+.more.open .chev {
+  transform: rotate(180deg);
+}
+.week-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+.week-wrap.open {
+  grid-template-rows: 1fr;
+}
+.week-inner {
+  overflow: hidden;
 }
 .head {
   display: flex;

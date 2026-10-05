@@ -14,7 +14,7 @@
 - **목록 / 지도 보기**
   - 목록: 영업 중 여부, 거리, 오늘·공휴일 운영 시간, 요일별 운영 시간
   - 지도(카카오맵): 영업 중은 강조 색 핀, 영업 종료는 흐린 핀. 핀을 누르면 약국 카드
-  - 약국마다 📞 전화, 카카오맵 길찾기, 네이버지도 버튼
+  - 약국마다 📞 전화, 카카오맵·네이버지도에서 위치 보기 버튼
 - **공휴일 안내**: 오늘이 공휴일(대체공휴일 포함)이면 맨 위에 안내
 - **테마**: 설정(`/settings`)에서 다크(기본), 남색 + 하늘, 라벤더, 보라 + 핑크, 라이트, 베이지 중 선택. 고른 테마는 기기에 저장
 
@@ -55,6 +55,8 @@
 ## 기술 구성
 
 - **화면**: Vue 3 + TypeScript + Vite, Vue Router, [Lucide](https://lucide.dev) 아이콘
+- **폰트**: [고운바탕](https://fonts.google.com/specimen/Gowun+Batang) (류양희, SIL Open Font License 1.1), Google Fonts로 불러옴
+- **로고·지도 마커**: 부엉이 모양을 `src/owl.ts`에 모아 두고 로고와 마커가 함께 사용
 - **서버**: Netlify Functions (`netlify/functions`)
   - `pharmacies.mts` → `GET /api/pharmacies` 약국 검색
   - `regions.mts` → `GET /api/regions` 시/도·시/군/구 목록
