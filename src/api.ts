@@ -28,6 +28,7 @@ export type SearchParams = {
   lat?: number;
   lon?: number;
   center?: { lat: number; lon: number }; // 정렬 기준 지점 (지도 가운데)
+  bbox?: [number, number, number, number]; // 이 범위 안만 (남, 서, 북, 동)
   sido?: string;
   sigungu?: string;
   q?: string;
@@ -63,6 +64,7 @@ export function searchPharmacies(p: SearchParams) {
     qs.set("clat", String(p.center.lat));
     qs.set("clon", String(p.center.lon));
   }
+  if (p.bbox) qs.set("bbox", p.bbox.join(","));
   if (p.sido) qs.set("sido", p.sido);
   if (p.sigungu) qs.set("sigungu", p.sigungu);
   if (p.q) qs.set("q", p.q);

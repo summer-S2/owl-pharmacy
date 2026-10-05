@@ -4,6 +4,7 @@ import { dayIndex, isOpenNow, kstNow, loadDataset, regionOf, type Pharmacy } fro
 // GET /api/pharmacies
 //   lat, lon        내 위치 (있으면 가까운 순, 거리 표시)
 //   clat, clon      정렬 기준 지점 (지도의 "이 지역에서 찾기": 지도 가운데에서 가까운 순. 거리는 계속 내 위치 기준)
+//   bbox            이 범위 안의 약국만 (남,서,북,동 위도·경도. 지도에서 보고 있는 화면)
 //   sido, sigungu   지역
 //   q               약국 이름 검색
 //   open=1          지금 영업 중만
@@ -36,6 +37,8 @@ export default async (req: Request) => {
   const clat = Number(params.get("clat"));
   const clon = Number(params.get("clon"));
   const hasCenter = params.has("clat") && params.has("clon") && Number.isFinite(clat) && Number.isFinite(clon);
+  const bboxNums = (params.get("bbox") ?? "").split(",").map(Number);
+  const bbox = bboxNums.length === 4 && bboxNums.every(Number.isFinite) ? bboxNums : null;
   const sido = params.get("sido") ?? "";
   const sigungu = params.get("sigungu") ?? "";
   const q = (params.get("q") ?? "").trim().replace(/\s+/g, "");
@@ -57,6 +60,10 @@ export default async (req: Request) => {
 
   let list: { p: Pharmacy; dist: number | null; sortKey: number }[] = [];
   for (const p of data.pharmacies) {
+    if (bbox) {
+      const [south, west, north, east] = bbox as [number, number, number, number];
+      if (p.lat < south || p.lat > north || p.lon < west || p.lon > east) continue;
+    }
     if (sido || sigungu) {
       const r = regionOf(p.addr);
       if (sido && r.sido !== sido) continue;

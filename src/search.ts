@@ -17,8 +17,9 @@ export const search = reactive({
   sigungu: "",
   // 이름 검색
   q: "",
-  // 지도에서 고른 곳 (지도 가운데)
+  // 지도에서 고른 곳: 보고 있던 화면의 가운데와 범위 (남, 서, 북, 동)
   areaCenter: null as { lat: number; lon: number } | null,
+  areaBounds: null as [number, number, number, number] | null,
   // 필터
   onlyOpen: true,
   onlyHoliday: false,
@@ -56,6 +57,7 @@ export async function runSearch(limit = search.baseLimit) {
       ...(search.coords ?? {}),
       // 지도에서 고른 곳이면 그 지점에서 가까운 순 (거리는 계속 내 위치 기준)
       center: search.mode === "area" ? (search.areaCenter ?? undefined) : undefined,
+      bbox: search.mode === "area" ? (search.areaBounds ?? undefined) : undefined,
       sido: search.mode === "region" ? search.sido : undefined,
       sigungu: search.mode === "region" ? search.sigungu : undefined,
       q: search.mode === "name" ? search.q.trim() : undefined,

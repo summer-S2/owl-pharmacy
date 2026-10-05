@@ -63,9 +63,15 @@ const naverUrl = computed(
     </div>
 
     <div class="actions">
-      <a v-if="p.tel" class="btn primary" :href="`tel:${p.tel}`"><Phone :size="17" />전화</a>
-      <a class="btn" :href="kakaoUrl" target="_blank" rel="noopener"><MapPin :size="17" />카카오맵에서 보기</a>
-      <a class="btn" :href="naverUrl" target="_blank" rel="noopener"><MapPin :size="17" />네이버지도에서 보기</a>
+      <!-- 첫 줄: 전화 (꽉 차게) / 둘째 줄: 카카오맵, 네이버지도 (반반)
+           좁은 화면에서는 "에서 보기"를 숨겨 글자를 줄인다 -->
+      <a v-if="p.tel" class="btn primary call" :href="`tel:${p.tel}`"><Phone :size="17" />전화</a>
+      <a class="btn" :href="kakaoUrl" target="_blank" rel="noopener" aria-label="카카오맵에서 보기">
+        <MapPin :size="17" />카카오맵<span class="suffix">에서 보기</span>
+      </a>
+      <a class="btn" :href="naverUrl" target="_blank" rel="noopener" aria-label="네이버지도에서 보기">
+        <MapPin :size="17" />네이버지도<span class="suffix">에서 보기</span>
+      </a>
     </div>
   </article>
 </template>
@@ -221,11 +227,21 @@ const naverUrl = computed(
   padding: 3px 0;
 }
 .actions {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 .actions .btn {
-  flex: 1 1 auto;
+  min-width: 0;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.actions .call {
+  grid-column: 1 / -1;
+}
+@media (max-width: 480px) {
+  .suffix {
+    display: none;
+  }
 }
 </style>
